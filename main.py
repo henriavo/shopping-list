@@ -4,20 +4,12 @@
 
 import webapp2
 import os
-
-#the method on this form is not defined
-#and so the default method on it is a GET
-#that is why the user enteted value is added as a url parameter. 
-form_html = """
-<form>
-<h2> Add a Food </h2>
-<input type="text" name="food">
-%s
-<button> Add </button>
+import jinja2
 
 
-</form>
-"""
+template_dir = os.path.join(os.path.dirname(__file__),'templates')
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
+
 
 hidden_html= """
 <input type="hidden" name="food" value="%s">
@@ -40,25 +32,35 @@ class Handler(webapp2.RequestHandler):
 	def write(self, *a, **kw):
 		self.response.write(*a, **kw)
 
+	def render_str(self, template, **params):
+		t = jinja_env.get_template(template)
+		return t.render(params)
+
+	def render(self, template, **kw):
+		self.write(self.render_str(template, **kw))
+
 class MainPage(Handler):
 	def get(self):
-		output = form_html
-		output_hidden = ""
+		self.render("shopping_list.html", name="Henri")
 
-		# gets a list of the "food" parameters in the url
-		items = self.request.get_all("food")
-		if items:
-			output_items = ""
-			for item in items:
-				output_hidden += hidden_html % item
-				output_items += item_html % item
 
-			output_shopping = shopping_list_html % output_items
-			output += output_shopping
+		# output = form_html
+		# output_hidden = ""
 
-		output = output % output_hidden
+		# # gets a list of the "food" parameters in the url
+		# items = self.request.get_all("food")
+		# if items:
+		# 	output_items = ""
+		# 	for item in items:
+		# 		output_hidden += hidden_html % item
+		# 		output_items += item_html % item
 
-		self.write(output)
+		# 	output_shopping = shopping_list_html % output_items
+		# 	output += output_shopping
+
+		# output = output % output_hidden
+
+		# self.write(output)
 
 
 		
