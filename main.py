@@ -36,12 +36,15 @@ class Handler(webapp2.RequestHandler):
 		t = jinja_env.get_template(template)
 		return t.render(params)
 
-	def render(self, template, **kw):
+	def renderIt(self, template, **kw):
 		self.write(self.render_str(template, **kw))
 
 class MainPage(Handler):
 	def get(self):
-		self.render("shopping_list.html", name="Henri")
+		n = self.request.get("n")
+		if n:
+			n = int(n)
+		self.renderIt("shopping_list.html", n=n)
 
 
 		# output = form_html
