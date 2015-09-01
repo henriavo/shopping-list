@@ -8,66 +8,38 @@ import jinja2
 
 
 template_dir = os.path.join(os.path.dirname(__file__),'templates')
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
+																autoescape=True)
 
 
-hidden_html= """
-<input type="hidden" name="food" value="%s">
-"""
 
-item_html = """
-<li>  %s </li>
-"""
-
-shopping_list_html= """
-<br>
-<br>
-<h2> Shopping List <h2>
-<ul>
-%s
-</ul>
-"""
 
 class Handler(webapp2.RequestHandler):
-	def write(self, *a, **kw):
-		self.response.write(*a, **kw)
+	def write(self, *a, **kwArgs):
+		self.response.write(*a, **kwArgs)
 
 	def render_str(self, template, **params):
 		t = jinja_env.get_template(template)
 		return t.render(params)
 
-	def renderIt(self, template, **kw):
-		self.write(self.render_str(template, **kw))
+	def renderIt(self, template, **kwArgs):
+		self.write(self.render_str(template, **kwArgs))
 
 class MainPage(Handler):
 	def get(self):
-		n = self.request.get("n")
-		if n:
-			n = int(n)
-		self.renderIt("shopping_list.html", n=n)
+		items = self.request.get_all("food")
+		self.renderIt("shopping_list.html", items=items)
 
-
-		# output = form_html
-		# output_hidden = ""
-
-		# # gets a list of the "food" parameters in the url
-		# items = self.request.get_all("food")
-		# if items:
-		# 	output_items = ""
-		# 	for item in items:
-		# 		output_hidden += hidden_html % item
-		# 		output_items += item_html % item
-
-		# 	output_shopping = shopping_list_html % output_items
-		# 	output += output_shopping
-
-		# output = output % output_hidden
-
-		# self.write(output)
+class FizzBuzzHandler(Handler):
+	def get(self):
+		n = self.request.get('n',0)
+		n = n and int(n)
+		self.renderIt("fizzbuzz.html", n=n)
 
 
 		
 
 app = webapp2.WSGIApplication([
-	('/', MainPage)
+	('/', MainPage),
+	('/fizzbuzz', FizzBuzzHandler)
 ], debug=True)
